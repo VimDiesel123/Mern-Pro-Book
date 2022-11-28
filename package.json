@@ -1,0 +1,11 @@
+{
+  "name": "mern-pro-book",
+  "version": "1.0.0",
+  "description": "Following along with MERN Pro Stack book",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "David Smith",
+  "license": "ISC"
+}
