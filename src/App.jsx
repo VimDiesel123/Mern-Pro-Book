@@ -1,49 +1,59 @@
-var contentNode = document.getElementById('contents');
+const dateRegex = new RegExp('^\\d\\d\\d\\d-\\d\\d-\\d\\d');
 
+function jsonDateReviver(key, value) {
+    if (dateRegex.test(value)) return new Date(value);
+    return value;
+}
 
 class IssueFilter extends React.Component {
     render() {
-        return (<div>This is a placeholder for the Issue Filter</div>)
+        return (
+            <div>This is a placeholder for the issue filter.</div>
+        );
     }
 }
 
+function IssueRow(props) {
+    const issue = props.issue;
+    return (
+        <tr>
+            <td>{issue.id}</td>
+            <td>{issue.status}</td>
+            <td>{issue.owner}</td>
+            <td>{issue.created.toDateString()}</td>
+            <td>{issue.effort}</td>
+            <td>{issue.due ? issue.due.toDateString() : ''}</td>
+            <td>{issue.title}</td>
+        </tr>
+    );
+}
+
 function IssueTable(props) {
-    const issueRows = props.issues.map(issue => <IssueRow key={issue.id} issue={issue} />);
+    const issueRows = props.issues.map(issue =>
+        <IssueRow key={issue.id} issue={issue} />
+    );
+
     return (
         <table className="bordered-table">
             <thead>
                 <tr>
-                    <th>Id</th>
-                    <th>Title</th>
+                    <th>ID</th>
+                    <th>Status</th>
                     <th>Owner</th>
                     <th>Created</th>
                     <th>Effort</th>
-                    <th>Completion</th>
+                    <th>Due Date</th>
                     <th>Title</th>
                 </tr>
             </thead>
             <tbody>
                 {issueRows}
             </tbody>
-        </table >
-    )
-
+        </table>
+    );
 }
 
-const IssueRow = (props) => (
-    <tr>
-        <td>{props.issue.id}</td>
-        <td>{props.issue.status}</td>
-        <td>{props.issue.owner}</td>
-        <td>{props.issue.created.toDateString()}</td>
-        <td>{props.issue.effort}</td>
-        <td>{props.issue.completionDate ? props.issue.completionDate.toDateString() : ''}</td>
-        <td>{props.issue.title}</td>
-    </tr>
-
-)
 class IssueAdd extends React.Component {
-
     constructor() {
         super();
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -51,37 +61,30 @@ class IssueAdd extends React.Component {
 
     handleSubmit(e) {
         e.preventDefault();
-        var form = document.forms.issueAdd;
-        this.props.createIssue({
-            owner: form.owner.value,
-            title: form.title.value,
-            status: 'New',
-            created: new Date(),
-        });
-        //clear the form for the next input.
-        form.owner.value = "";
-        form.title.value = "";
+        const form = document.forms.issueAdd;
+        const issue = {
+            owner: form.owner.value, title: form.title.value,
+            due: new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * 10),
+        }
+        this.props.createIssue(issue);
+        form.owner.value = ""; form.title.value = "";
     }
 
     render() {
         return (
-            <div>
-                <form name="issueAdd"
-                    onSubmit={this.handleSubmit}>
-                    <input type="text" name="owner" placeholder="Owner" />
-                    <input type="text" name="title" placeholder="Title" />
-                    <button>Add</button>
-                </form>
-            </div>)
+            <form name="issueAdd" onSubmit={this.handleSubmit}>
+                <input type="text" name="owner" placeholder="Owner" />
+                <input type="text" name="title" placeholder="Title" />
+                <button>Add</button>
+            </form>
+        );
     }
 }
-
 
 class IssueList extends React.Component {
     constructor() {
         super();
         this.state = { issues: [] };
-
         this.createIssue = this.createIssue.bind(this);
     }
 
@@ -89,57 +92,64 @@ class IssueList extends React.Component {
         this.loadData();
     }
 
-    loadData() {
-        fetch('/api/issues')
-            .then(response => response.json())
-            .then(data => {
-                console.log("Total count of records:", data._metadata.total_count);
-                data.records.forEach(issue => {
-                    issue.created = new Date(issue.created);
-                    if (issue.completionDate)
-                        issue.completionDate = new Date(issue.completionDate);
-                });
-                this.setState({ issues: data.records });
-            })
-            .catch(error => {
-                console.log(error);
-            })
+    async loadData() {
+        const query = `query {
+      issueList {
+        id title status owner
+        created effort due
+      }
+    }`;
+
+        const response = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        const body = await response.text();
+        const result = JSON.parse(body, jsonDateReviver);
+
+        console.log("Result: ", result);
+
+        this.setState({ issues: result.data.issueList });
     }
 
-    createIssue(newIssue) {
-        fetch('/api/issues', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(newIssue) })
-            .then(response => {
-                if (response.ok) {
-                    response.json().then(updatedIssue => {
-                        updatedIssue.created = new Date(updatedIssue.created);
-                        if (updatedIssue.completionDate)
-                            updatedIssue.completionDate = new Date(updatedIssue.completionDate);
-                        const newIssues = this.state.issues.concat(updatedIssue);
-                        this.setState({ issues: newIssues });
-                    })
-                }
-                else {
-                    response.json().then(error => {
-                        alert("Failed to add issue: " + error.message)
-                    });
-                }
-            })
-            .catch(error => {
-                alert("Error in sending data to server" + error.message);
-            });
+    async createIssue(issue) {
+        const query = `mutation {
+      issueAdd(issue:{
+        title: "${issue.title}",
+        owner: "${issue.owner}",
+        due: "${issue.due.toISOString()}",
+      }) {
+        id
+      }
+    }`;
+
+
+        const response = await fetch('/graphql', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+
+        console.log("Response:", response);
+
+        this.loadData();
     }
 
     render() {
         return (
-            <div>
+            <React.Fragment>
                 <h1>Issue Tracker</h1>
                 <IssueFilter />
                 <hr />
                 <IssueTable issues={this.state.issues} />
                 <hr />
                 <IssueAdd createIssue={this.createIssue} />
-            </div>
-        )
+            </React.Fragment>
+        );
     }
 }
-ReactDOM.render(<IssueList />, contentNode); //Render the component inside the content Node
+
+const element = <IssueList />;
+
+ReactDOM.render(element, document.getElementById('contents'));
