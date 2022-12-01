@@ -1,7 +1,13 @@
 const express = require("express");
 require("dotenv").config();
+const proxy = require("http-proxy-middleware");
 
 const app = express();
+
+const apiProxyTarget = process.env.API_PROXY_TARGET;
+if (apiProxyTarget) {
+  app.use("/graphql", proxy({ target: apiProxyTarget }));
+}
 
 app.use(express.static("public"));
 

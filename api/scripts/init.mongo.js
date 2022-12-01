@@ -1,3 +1,6 @@
+/* global db print */
+/* eslint no-restricted-globals: "off" */
+
 db.issues.deleteMany({});
 
 const issuesDB = [

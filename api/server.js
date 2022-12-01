@@ -91,7 +91,10 @@ const server = new ApolloServer({
 
 const app = express();
 
-server.applyMiddleware({ app, path: "/graphql" });
+const enableCors = (process.env.ENABLE_CORS || "true") == "true";
+console.log("CORS setting:", enableCors);
+
+server.applyMiddleware({ app, path: "/graphql", cors: enableCors });
 
 async function connectToDb() {
   const client = new MongoClient(url);
