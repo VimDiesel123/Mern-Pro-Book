@@ -1,11 +1,11 @@
-const { MongoClient } = require('mongodb');
 require('dotenv').config();
+const { MongoClient } = require('mongodb');
 
-const url = process.env.DB_URL || 'mongodb://127.0.0.1/issuetracker';
+const url = process.env.DB_URL || 'mongodb://localhost/issuetracker';
 
 function testWithCallbacks(callback) {
   console.log('\n--- testWithCallbacks ---');
-  const client = new MongoClient(url);
+  const client = new MongoClient(url, { useNewUrlParser: true });
   client.connect((connErr) => {
     if (connErr) {
       callback(connErr);
