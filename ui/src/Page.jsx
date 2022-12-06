@@ -1,17 +1,37 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import {
+  Navbar, NavItem, Nav, Glyphicon, OverlayTrigger, NavDropdown, MenuItem,
+} from 'react-bootstrap';
+import { LinkContainer } from 'react-router-bootstrap';
 
 import Contents from './Contents.jsx';
 
 function NavBar() {
   return (
-    <nav>
-      <NavLink exact to="/">Home</NavLink>
-      {' | '}
-      <NavLink to="/issues">Issue List</NavLink>
-      {' | '}
-      <NavLink to="/report">Report</NavLink>
-    </nav>
+    <Navbar>
+      <Navbar.Header>
+        <Navbar.Brand>Issue Tracker</Navbar.Brand>
+      </Navbar.Header>
+      <Nav>
+        <NavItem>Home</NavItem>
+        <NavItem>Issue List</NavItem>
+        <NavItem>Report</NavItem>
+      </Nav>
+      <Nav pullRight>
+        <NavItem>
+          <OverlayTrigger>
+            <Glyphicon glyph="plus" />
+          </OverlayTrigger>
+        </NavItem>
+        <NavDropdown
+          id="user-dropdown"
+          title={<Glyphicon glyph="option-vertical" />}
+          noCaret
+        >
+          <MenuItem>About</MenuItem>
+        </NavDropdown>
+      </Nav>
+    </Navbar>
   );
 }
 
