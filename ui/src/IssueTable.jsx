@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Button, Glyphicon, OverlayTrigger, Tooltip, Table,
 } from 'react-bootstrap';
-import { Link, NavLink, withRouter } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import { LinkContainer } from 'react-router-bootstrap';
 
 /* eslint-disable react/jsx-no-bind */
