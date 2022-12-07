@@ -75,6 +75,7 @@ export default function Page() {
       <Grid fluid>
         <Contents />
       </Grid>
+      <hr />
       <Footer />
     </div>
   );
