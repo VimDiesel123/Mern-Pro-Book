@@ -45,6 +45,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.2",
     "eslint-plugin-react": "^7.12.3",
     "webpack-dev-middleware": "^3.7.3",
-    "webpack-hot-middleware": "^2.25.3"
+    "webpack-hot-middleware": "^2.25.3",
+    "webpack-node-externals": "^1.7.2"
   }
 }
