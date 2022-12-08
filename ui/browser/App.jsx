@@ -16,4 +16,4 @@ const element = (
   </Router>
 );
 
-ReactDOM.render(element, document.getElementById('contents'));
+ReactDOM.hydrate(element, document.getElementById('contents'));
