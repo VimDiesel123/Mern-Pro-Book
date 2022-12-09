@@ -1,7 +1,11 @@
 const { UserInputError } = require('apollo-server-express');
 const { getDb, getNextSequence } = require('./db');
 
-async function list(_, { status, effortMin, effortMax }) {
+const PAGE_SIZE = 10;
+
+async function list(_, {
+  status, effortMin, effortMax, page,
+}) {
   const db = getDb();
   const filter = {};
   if (status) filter.status = status;
@@ -12,8 +16,16 @@ async function list(_, { status, effortMin, effortMax }) {
     if (effortMax !== undefined) filter.effort.$lte = effortMax;
   }
 
-  const issues = await db.collection('issues').find(filter).toArray();
-  return issues;
+  const issues = await db.collection('issues').find(filter)
+    .sort({ id: 1 })
+    .skip(PAGE_SIZE * (page - 1))
+    .limit(PAGE_SIZE)
+    .toArray();
+
+  const totalCount = await db.collection('issues').countDocuments(filter);
+  const pages = Math.ceil(totalCount / PAGE_SIZE);
+
+  return { issues, pages };
 }
 
 async function counts(_, { status, effortMin, effortMax }) {
