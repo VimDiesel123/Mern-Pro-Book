@@ -4,11 +4,12 @@ const { getDb, getNextSequence } = require('./db');
 const PAGE_SIZE = 10;
 
 async function list(_, {
-  status, effortMin, effortMax, page,
+  status, effortMin, effortMax, search, page,
 }) {
   const db = getDb();
   const filter = {};
   if (status) filter.status = status;
+  if (search) filter.$text = { $search: search };
 
   if (effortMin !== undefined || effortMax !== undefined) {
     filter.effort = {};
