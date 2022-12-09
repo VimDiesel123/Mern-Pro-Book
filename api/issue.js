@@ -120,6 +120,20 @@ async function remove(_, { id }) {
   return false;
 }
 
+async function restore(_, { id }) {
+  const db = getDb();
+  const issue = await db.collection('deleted_issues').findOne({ id });
+  if (!issue) return false;
+  issue.deleted = new Date();
+
+  let result = await db.collection('issues').insertOne(issue);
+  if (result.insertedId) {
+    result = await db.collection('deleted_issues').deleteOne({ id });
+    return result.deletedCount === 1;
+  }
+  return false;
+}
+
 module.exports = {
   list,
   add,
@@ -127,4 +141,5 @@ module.exports = {
   update,
   delete: remove,
   counts,
+  restore,
 };
