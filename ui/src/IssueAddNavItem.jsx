@@ -53,6 +53,7 @@ class IssueAddNavItem extends React.Component {
   render() {
     const { showing } = this.state;
     const { user: { signedIn } } = this.props;
+
     return (
       <React.Fragment>
         <NavItem disabled={!signedIn} onClick={this.showModal}>
