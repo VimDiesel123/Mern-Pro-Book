@@ -10,7 +10,6 @@ class SignInNavItem extends React.Component {
     super(props);
     this.state = {
       showing: false,
-      user: { signedIn: false, givenName: '' },
     };
     this.showModal = this.showModal.bind(this);
     this.hideModal = this.hideModal.bind(this);
@@ -18,25 +17,10 @@ class SignInNavItem extends React.Component {
     this.signIn = this.signIn.bind(this);
   }
 
-  async componentDidMount() {
-    await this.loadData();
-  }
-
-  async loadData() {
-    const apiEndpoint = window.ENV.UI_AUTH_ENDPOINT;
-    const response = await fetch(`${apiEndpoint}/user`, {
-      method: 'POST',
-    });
-    const body = await response.text();
-    const result = JSON.parse(body);
-    const { signedIn, givenName } = result;
-    this.setState({ user: { signedIn, givenName } });
-  }
-
   async signIn(response) {
     this.hideModal();
     const googleToken = response.credential;
-    const { showError } = this.props;
+    const { showError, onUserChange } = this.props;
     try {
       const apiEndpoint = window.ENV.UI_AUTH_ENDPOINT;
       const verificationResponse = await fetch(`${apiEndpoint}/signin`, {
@@ -47,8 +31,7 @@ class SignInNavItem extends React.Component {
       const body = await verificationResponse.text();
       const result = JSON.parse(body);
       const { signedIn, givenName } = result;
-
-      this.setState({ user: { signedIn, givenName } });
+      onUserChange({ signedIn, givenName });
     } catch (error) {
       showError(`Error signing into the app: ${error}`);
     }
@@ -57,13 +40,13 @@ class SignInNavItem extends React.Component {
 
   async signOut() {
     const apiEndpoint = window.ENV.UI_AUTH_ENDPOINT;
-    const { showError } = this.props;
+    const { showError, onUserChange } = this.props;
     try {
       await fetch(`${apiEndpoint}/signout`, {
         method: 'POST',
       });
       googleLogout();
-      this.setState({ user: { signedIn: false, givenName: '' } });
+      onUserChange({ signedIn: false, givenName: '' });
     } catch (error) {
       showError(`Error signing out: ${error}`);
     }
@@ -78,7 +61,7 @@ class SignInNavItem extends React.Component {
   }
 
   render() {
-    const { user } = this.state;
+    const { user } = this.props;
     if (user.signedIn) {
       return (
         <NavDropdown title={user.givenName} id="user">
