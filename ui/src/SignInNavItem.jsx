@@ -2,7 +2,7 @@ import React from 'react';
 import {
   MenuItem, NavDropdown, Modal, Button, NavItem,
 } from 'react-bootstrap';
-import { GoogleLogin } from '@react-oauth/google';
+import { GoogleLogin, googleLogout } from '@react-oauth/google';
 import withToast from './ToastWrapper.jsx';
 
 class SignInNavItem extends React.Component {
@@ -55,8 +55,18 @@ class SignInNavItem extends React.Component {
   }
 
 
-  signOut() {
-    this.setState({ user: { signedIn: false, givenName: '' } });
+  async signOut() {
+    const apiEndpoint = window.ENV.UI_AUTH_ENDPOINT;
+    const { showError } = this.props;
+    try {
+      await fetch(`${apiEndpoint}/signout`, {
+        method: 'POST',
+      });
+      googleLogout();
+      this.setState({ user: { signedIn: false, givenName: '' } });
+    } catch (error) {
+      showError(`Error signing out: ${error}`);
+    }
   }
 
   showModal() {
