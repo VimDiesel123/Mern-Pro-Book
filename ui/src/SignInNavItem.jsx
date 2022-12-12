@@ -2,10 +2,10 @@ import React from 'react';
 import {
   MenuItem, NavDropdown, Modal, Button, NavItem,
 } from 'react-bootstrap';
-import { GoogleLogin } from 'react-google-login';
-import { gapi } from 'gapi-script';
+import { GoogleLogin } from '@react-oauth/google';
+import withToast from './ToastWrapper.jsx';
 
-export default class SignInNavItem extends React.Component {
+class SignInNavItem extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -18,22 +18,25 @@ export default class SignInNavItem extends React.Component {
     this.signIn = this.signIn.bind(this);
   }
 
-  componentDidMount() {
-    const clientId = window.ENV.GOOGLE_CLIENT_ID;
-    if (!clientId) return;
-    const initClient = () => {
-      gapi.client.init({
-        clientId,
-        scope: '',
-      });
-    };
-
-    gapi.load('client:auth2', initClient);
-  }
-
-  signIn() {
+  async signIn(response) {
     this.hideModal();
-    this.setState({ user: { signedIn: true, givenName: 'User1' } });
+    const googleToken = response.credential;
+    const { showError } = this.props;
+    try {
+      const apiEndpoint = window.ENV.UI_AUTH_ENDPOINT;
+      const verificationResponse = await fetch(`${apiEndpoint}/signin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ google_token: googleToken }),
+      });
+      const body = await verificationResponse.text();
+      const result = JSON.parse(body);
+      const { signedIn, givenName } = result;
+
+      this.setState({ user: { signedIn, givenName } });
+    } catch (error) {
+      showError(`Error signing into the app: ${error}`);
+    }
   }
 
   signOut() {
@@ -49,7 +52,6 @@ export default class SignInNavItem extends React.Component {
   }
 
   render() {
-    const clientID = window.ENV.GOOGLE_CLIENT_ID;
     const { user } = this.state;
     if (user.signedIn) {
       return (
@@ -70,11 +72,9 @@ export default class SignInNavItem extends React.Component {
           </Modal.Header>
           <Modal.Body>
             <GoogleLogin
-              clientId={clientID}
-              buttonText="Sign in with Google"
               onSuccess={this.signIn}
-              cookiePolicy="single_host_origin"
-              isSignedIn
+              onError={() => console.log('Login failed')}
+              theme="filled_black"
             />
           </Modal.Body>
           <Modal.Footer>
@@ -85,3 +85,5 @@ export default class SignInNavItem extends React.Component {
     );
   }
 }
+
+export default withToast(SignInNavItem);

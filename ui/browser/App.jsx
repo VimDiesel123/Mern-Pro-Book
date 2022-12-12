@@ -2,6 +2,7 @@ import 'babel-polyfill';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { BrowserRouter as Router } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 
 import Page from '../src/Page.jsx';
 import store from '../src/store.js';
@@ -13,10 +14,14 @@ if (module.hot) {
   module.hot.accept();
 }
 
+const clientId = window.ENV.GOOGLE_CLIENT_ID;
+
 const element = (
-  <Router>
-    <Page />
-  </Router>
+  <GoogleOAuthProvider clientId={clientId}>
+    <Router>
+      <Page />
+    </Router>
+  </GoogleOAuthProvider>
 );
 
 ReactDOM.hydrate(element, document.getElementById('contents'));
