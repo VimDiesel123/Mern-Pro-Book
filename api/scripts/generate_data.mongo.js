@@ -26,6 +26,6 @@ for (let i = 0; i < 100; i += 1) {
 }
 
 const count = db.issues.countDocuments();
-db.counters.updateOne({ _id: 'issues ' }, { $set: { current: count } });
+db.counters.updateOne({ _id: 'issues' }, { $set: { current: count } });
 
 print('New issue count:', count);

@@ -15,8 +15,6 @@ class IssueRowPlain extends React.Component {
     } = this.props;
     const user = this.context;
     const disabled = !user.signedIn;
-    console.log('Disabled: ', disabled);
-
     const selectLocation = { pathname: `/issues/${issue.id}`, search };
     const editToolTip = (
       <Tooltip id="edit-tooltip" placement="top">Edit Issue</Tooltip>
