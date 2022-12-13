@@ -1,6 +1,6 @@
 import serealize from 'serialize-javascript';
 
-export default function template(body, data) {
+export default function template(body, initialData, userData) {
   return `<!DOCTYPE HTML>
 <html>
 <head>
@@ -19,7 +19,10 @@ export default function template(body, data) {
 <body>
   <!-- Page generated from template. -->
   <div id="contents">${body}</div>
-  <script>window.__INITIAL_DATA__ = ${serealize(data)}</script>
+  <script>
+    window.__INITIAL_DATA__ = ${serealize(initialData)}
+    window.__USER_DATA__ = ${serealize(userData)}
+  </script>
 
   <script src="/env.js"></script>
   <script src="/vendor.bundle.js"></script>

@@ -83,5 +83,11 @@ function mustBeSignedIn(resolver) {
   };
 }
 
+function resolveUser(_, args, { user }) {
+  return user;
+}
 
-module.exports = { routes, getUser, mustBeSignedIn };
+
+module.exports = {
+  routes, getUser, mustBeSignedIn, resolveUser,
+};
