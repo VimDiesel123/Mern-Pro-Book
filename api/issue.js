@@ -8,6 +8,7 @@ async function list(_, {
   status, effortMin, effortMax, search, page,
 }) {
   const db = getDb();
+  console.log(db.collection('issues').find({}).toArray());
   const filter = {};
   if (status) filter.status = status;
   if (search) filter.$text = { $search: search };
